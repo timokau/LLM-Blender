@@ -90,10 +90,16 @@ def main(args):
             json_config = f.read()
             config = RankerConfig.from_json(json_config)
 
+        # It is expected and harmless that these configs change.
+        override_whitelist = ["load_checkpoint"]
         for k in args.__dict__:
             if k in config.__dict__:
-                print(k, getattr(args, k))
-                setattr(config, k, getattr(args, k))
+                if getattr(config, k) != getattr(args, k):
+                    if k not in override_whitelist:
+                        print("WARNING: Overriding checkpoint config")
+                        print(f"config.{k} = {
+                              getattr(config, k)} -> {getattr(args, k)}")
+                    setattr(config, k, getattr(args, k))
         model = build_ranker(
             args.ranker_type,
             args.model_type,
