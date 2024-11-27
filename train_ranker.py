@@ -8,6 +8,7 @@ import os
 import argparse
 import torch
 import transformers
+import huggingface_hub
 import safetensors
 import numpy as np
 import wandb
@@ -87,15 +88,31 @@ def main(args):
     # set up model
     
     if args.load_checkpoint:
-        model_file_bin = os.path.join(
-            args.load_checkpoint, "pytorch_model.bin")
-        if not os.path.exists(model_file_bin):
-            model_file_bin = None
-        model_file_safetensors = os.path.join(args.load_checkpoint, "model.safetensors")
-        if not os.path.exists(model_file_safetensors):
-            model_file_safetensors = None
+        if args.load_checkpoint.startswith("hf:"):
+            repo_id = args.load_checkpoint[len("hf:"):]
+            config_file = huggingface_hub.hf_hub_download(
+                repo_id, "config.json")
+            try:
+                model_file_bin = huggingface_hub.hf_hub_download(
+                    repo_id, "pytorch_model.bin")
+            except huggingface_hub.errors.EntryNotFoundError:
+                model_file_bin = None
+            try:
+                model_file_safetensors = huggingface_hub.hf_hub_download(
+                    repo_id, "model.safetensors")
+            except huggingface_hub.errors.EntryNotFoundError:
+                model_file_safetensors = None
+        else:
+            config_file = os.path.join(args.load_checkpoint, "config.json")
+            model_file_bin = os.path.join(
+                args.load_checkpoint, "pytorch_model.bin")
+            if not os.path.exists(model_file_bin):
+                model_file_bin = None
+            model_file_safetensors = os.path.join(args.load_checkpoint, "model.safetensors")
+            if not os.path.exists(model_file_safetensors):
+                model_file_safetensors = None
 
-        with open(os.path.join(args.load_checkpoint, "config.json"), "r") as f:
+        with open(config_file, "r") as f:
             json_config = f.read()
             config = RankerConfig.from_json(json_config)
 
