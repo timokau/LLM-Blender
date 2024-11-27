@@ -86,7 +86,10 @@ def main(args):
     # set up model
     
     if args.load_checkpoint:
-        config = RankerConfig.from_json_file(os.path.join(args.load_checkpoint, "config.json"))
+        with open(os.path.join(args.load_checkpoint, "config.json"), "r") as f:
+            json_config = f.read()
+            config = RankerConfig.from_json(json_config)
+
         for k in args.__dict__:
             if k in config.__dict__:
                 print(k, getattr(args, k))
