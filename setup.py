@@ -14,6 +14,11 @@ setup(
     author_email='dongfu.jdf@gmail.com',
     packages=find_packages(),
     url='https://yuchenlin.xyz/LLM-Blender/',
+    entry_points={
+        'console_scripts': [
+            'train_ranker = llm_blender.train_ranker:main',
+        ],
+    },
     install_requires=[
         'transformers',
         'torch',
