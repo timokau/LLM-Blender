@@ -25,7 +25,7 @@ test_data_path="./data/${eval_dataset}/all_test_items.json"
 
 # Run training
 ${LAUNCH_CMD} \
-train_ranker.py \
+python3 -m llm_blender.train_ranker \
     --ranker_type "pairranker" \
     --model_type ${backbone_type} \
     --model_name ${backbone_name} \
